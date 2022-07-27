@@ -43,8 +43,4 @@ export class User{
         nullable: false,
     })
     isDisabled: boolean;
-
-
-
-
 }
