@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Length } from "class-validator";
+import { Thread } from "./Thread";
+import { ThreadItem } from "./ThreadItem";
 
 @Entity({name: "Users"})
 export class User{
@@ -43,4 +45,13 @@ export class User{
         nullable: false,
     })
     isDisabled: boolean;
+
+    @OneToMany(() => Thread, (thread) => thread.user)
+    threads: Thread[];
+
+    @OneToMany(()=>ThreadItem, threadItem => threadItem.thread)
+    threadItems:ThreadItem[];
+
+    
+
 }
