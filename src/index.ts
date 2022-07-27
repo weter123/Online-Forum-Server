@@ -3,7 +3,10 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import Redis from "ioredis";
 import { createConnection } from "typeorm";
+import { ThreadItem } from "./repo/ThreadItem";
 import { User } from "./repo/User";
+import { Thread } from "./repo/Thread";
+
 
 
 require("dotenv").config();
@@ -17,7 +20,7 @@ const main = async() =>{
     
     const app = express();
     const router = express.Router();
-    //must fix
+    //must fix: Replace creatConnection if possible. utilze ormconfig
     await createConnection({
         type: "postgres",
         host: "localhost",
@@ -25,7 +28,9 @@ const main = async() =>{
         username: "superforumsvc",
         password: "weter123",
         database: "SuperForum",
-        entities: [User],
+        synchronize: true,
+        entities: [User,ThreadItem, Thread],
+        logging: false
       });
 
       
