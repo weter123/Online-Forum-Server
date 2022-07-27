@@ -3,7 +3,7 @@ import { Length } from "class-validator";
 
 @Entity({name: "Users"})
 export class User{
-    @PrimaryGeneratedColumn({name:"id", type:"bigint"})
+    @PrimaryGeneratedColumn({name:"Id", type:"bigint"})
     id: string;
 
     @Column("varchar", {
