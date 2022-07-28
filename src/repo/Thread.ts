@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from "ty
 import { Length } from "class-validator";
 import { User } from "./User";
 import { ThreadItem } from "./ThreadItem";
-
+import { ThreadPoint } from "./ThreadPoints";
 @Entity({name: "Threads"})
 export class Thread{
     @PrimaryGeneratedColumn({name:"Id", type:"bigint"})
@@ -41,4 +41,7 @@ export class Thread{
     user: User;
     @OneToMany(()=>ThreadItem,threadItems => threadItems.thread)
     threadItems: ThreadItem[];
+
+    @OneToMany(()=> ThreadPoint, (threadPoint)=>{threadPoint.thread})
+    threadPoints: ThreadPoint[];
 }

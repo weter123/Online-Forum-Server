@@ -2,6 +2,8 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Length } from "class-validator";
 import { Thread } from "./Thread";
 import { ThreadItem } from "./ThreadItem";
+import { ThreadPoint } from "./ThreadPoints";
+import { ThreadItemPoint } from "./ThreadItemPoints";
 
 @Entity({name: "Users"})
 export class User{
@@ -51,6 +53,13 @@ export class User{
 
     @OneToMany(()=>ThreadItem, threadItem => threadItem.thread)
     threadItems:ThreadItem[];
+
+    @OneToMany(()=> ThreadPoint, (threadPoint)=>{threadPoint.user})
+    threadPoints: ThreadPoint[];
+
+    @OneToMany(()=> ThreadItemPoint, (threadItemPoint)=>{threadItemPoint.user})
+    threadItemPoints: ThreadItemPoint[];
+
 
     
 
