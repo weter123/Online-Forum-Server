@@ -3,11 +3,6 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import Redis from "ioredis";
 import { createConnection } from "typeorm";
-import { ThreadItem } from "./repo/ThreadItem";
-import { User } from "./repo/User";
-import { Thread } from "./repo/Thread";
-
-
 
 require("dotenv").config();
 declare module "express-session" {
@@ -29,11 +24,10 @@ const main = async() =>{
         password: "weter123",
         database: "SuperForum",
         synchronize: true,
-        entities: [User,ThreadItem, Thread],
+        entities: ["src/repo/**/*.*"],
         logging: false
       });
 
-      
     const redis = new Redis({
         port:Number(process.env.REDIS_PORT),
         host: process.env.REDIS_HOST,
@@ -62,7 +56,6 @@ const main = async() =>{
         } as any)
     );
 
-
     app.use(router);
     router.get("/", (req,res,next)=> {
         if(!req.session!.userid){
@@ -76,8 +69,6 @@ const main = async() =>{
 
         res.send(`userid: ${ req.session!.userid}, loadedCount: ${req.session!.loadedCount}`);
     });
-
-
 
     app.listen({port:process.env.SERVER_PORT},()=>{
         console.log(`Server ready on port ${process.env.SERVER_PORT}`);
