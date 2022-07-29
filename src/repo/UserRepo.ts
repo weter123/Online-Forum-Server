@@ -36,9 +36,42 @@ export const register = async(
         userName,
         password: hashedPassword
     }).save();
-    
+
     userEntity.password ="";
     return {
         user:userEntity
     };
 };
+
+export const login = async(
+    userName: string,
+    password: string
+): Promise<UserResult> => {
+    const user = await User.findOne({
+        where: {userName},
+    });
+
+    if(!user){
+        return {
+            messages:[userNotFound(userName)]
+        }
+    }
+    if(!user.confirmed){
+        return {
+            messages: ["User has not confirmed their registration email yet."],
+        }
+    }
+    const passwordMatch = await bcrypt.compare(password, user?.password);
+    if(!passwordMatch){
+        return{
+            messages: ["password is invalid."]
+        }
+    }
+    return{
+        user: user
+    };
+};
+
+function userNotFound(userName: string) {
+    return `User with userName ${userName} not found.`;
+  }
