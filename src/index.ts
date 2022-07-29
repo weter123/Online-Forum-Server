@@ -3,14 +3,15 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import Redis from "ioredis";
 import { createConnection } from "typeorm";
-import { register } from "./repo/UserRepo";
+import { login, register } from "./repo/UserRepo";
 import bodyParser from "body-parser";
 
 require("dotenv").config();
 declare module "express-session" {
     interface SessionData {
-      userid: string;
-      loadedCount: any
+      userId: string;
+      loadedCount: any;
+      test: string;
     }
   }
 const main = async() =>{
@@ -40,7 +41,9 @@ const main = async() =>{
     const redisStore = new RedisStore({
         client:redis,
     });
+
     app.use(bodyParser.json());
+
     app.use(
         session({
             store: redisStore,
@@ -55,11 +58,15 @@ const main = async() =>{
                 secure:false,
                 maxAge: 1000*60*60*24,
             },
-
         } as any)
     );
 
     app.use(router);
+    router.get("/", (req, res, next) => {
+        req.session!.test = "hello";
+        res.send("hello");
+      });
+
     router.post("/register", async(req,res,next)=> {
         try{
             console.log("params", req.body);
@@ -78,6 +85,26 @@ const main = async() =>{
             }
         } catch (ex){
             res.send(ex.message);
+        }
+    });
+
+    router.post("/login", async(req,res,next)=> {
+        try {
+            console.log("params", req.body);
+            const userResult = await login(
+                req.body.userName,
+                req.body.password
+            );
+            if(userResult && userResult.user){
+                req.session!.userId =userResult.user?.id;
+                res.send(`user logged in, useId: ${req.session!.userId}`)
+            } else if(userResult && userResult.messages){
+                res.send(userResult.messages[0]);
+            } else{
+                next();
+            }
+        } catch (ex){
+            res.send(ex.message)
         }
     });
 
