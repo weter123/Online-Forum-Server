@@ -3,6 +3,8 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import Redis from "ioredis";
 import { createConnection } from "typeorm";
+import { register } from "./repo/UserRepo";
+import bodyParser from "body-parser";
 
 require("dotenv").config();
 declare module "express-session" {
@@ -38,6 +40,7 @@ const main = async() =>{
     const redisStore = new RedisStore({
         client:redis,
     });
+    app.use(bodyParser.json());
     app.use(
         session({
             store: redisStore,
@@ -57,17 +60,25 @@ const main = async() =>{
     );
 
     app.use(router);
-    router.get("/", (req,res,next)=> {
-        if(!req.session!.userid){
-            req.session!.userid = req.query.userid  as string;
-            console.log("Userid is set");
-            req.session!.loadedCount = 0;
+    router.post("/register", async(req,res,next)=> {
+        try{
+            console.log("params", req.body);
+            const userResult = await register(
+                req.body.email,
+                req.body.userName,
+                req.body.password
+            );
+            if(userResult && userResult.user){
+                res.send(`new user created, userId: ${ userResult.user.id}`);
+            }
+            else if( userResult && userResult.messages){
+                res.send(userResult.messages[0]);
+            }else{
+                next();
+            }
+        } catch (ex){
+            res.send(ex.message);
         }
-        else{
-            req.session!.loadedCount = Number(req.session!.loadedCount) +1;
-        }
-
-        res.send(`userid: ${ req.session!.userid}, loadedCount: ${req.session!.loadedCount}`);
     });
 
     app.listen({port:process.env.SERVER_PORT},()=>{
