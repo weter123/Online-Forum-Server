@@ -3,14 +3,14 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import Redis from "ioredis";
 import { createConnection } from "typeorm";
-import { login, register } from "./repo/UserRepo";
+import { login, logout, register } from "./repo/UserRepo";
 import bodyParser from "body-parser";
+import { createThread, getThreadByCategoryId } from "./repo/ThreadRepo";
 
 require("dotenv").config();
 declare module "express-session" {
     interface SessionData {
-      userId: string;
-      loadedCount: any;
+      userId: string | null;
       test: string;
     }
   }
@@ -91,13 +91,14 @@ const main = async() =>{
     router.post("/login", async(req,res,next)=> {
         try {
             console.log("params", req.body);
+            console.log("userid", req.session!.userId);
             const userResult = await login(
                 req.body.userName,
                 req.body.password
             );
             if(userResult && userResult.user){
                 req.session!.userId =userResult.user?.id;
-                res.send(`user logged in, useId: ${req.session!.userId}`)
+                res.send(`user logged in, userId: ${req.session!.userId}`)
             } else if(userResult && userResult.messages){
                 res.send(userResult.messages[0]);
             } else{
@@ -108,6 +109,42 @@ const main = async() =>{
         }
     });
 
+    router.post("/logout", async (req, res, next) => {
+        try {
+          console.log("params", req.body);
+          console.log("userid", req.session!.userId);
+          const msg = await logout(req.body.userName);
+          if (msg) {
+            req.session!.userId = null;
+            res.send(msg);
+          } else {
+            next();
+          }
+        } catch (ex) {
+          console.log(ex);
+          res.send(ex.message);
+        }
+      });
+
+    router.post("/createthread", async(req,res,next)=> {
+        try{
+            console.log("userId", req.session);
+            console.log("body", req.body);
+            const msg = await createThread(
+                req.session!.userId!,
+                req.body.categoryId,
+                req.body.title,
+                req.body.body  
+            );
+
+            res.send(msg);
+        } catch (ex){
+            console.log(ex);
+            res.send(ex.message);
+        }
+    })
+
+   
     app.listen({port:process.env.SERVER_PORT},()=>{
         console.log(`Server ready on port ${process.env.SERVER_PORT}`);
     });
