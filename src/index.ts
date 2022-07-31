@@ -6,6 +6,7 @@ import { createConnection } from "typeorm";
 import { login, logout, register } from "./repo/UserRepo";
 import bodyParser from "body-parser";
 import { createThread, getThreadByCategoryId, getThreadById } from "./repo/ThreadRepo";
+import { createThreadItem, getThreadItemsByThreadId } from "./repo/ThreadItemRepo";
 
 require("dotenv").config();
 declare module "express-session" {
@@ -178,7 +179,43 @@ const main = async() =>{
             res.send(ex.message);
         }
     });
-   
+
+    router.post("/createthreaditem", async(req, res, next)=> {
+        try{
+            const msg = await createThreadItem(
+                req.session!.userId,
+                req.body.threadId,
+                req.body.body
+            );
+
+            res.send(msg);
+        } catch (ex){
+            console.log(ex);
+            res.send(ex.message);
+        }
+    });
+
+    router.post("/threadsitemsbythread", async (req,res,next)=>{
+        try{
+            const threadItemResult = await getThreadItemsByThreadId(
+                req.body.threadId
+            );
+
+            if(threadItemResult && threadItemResult.entities){
+                let items ="";
+                threadItemResult.entities.forEach((ti)=> {
+                    items += ti.body + ", ";
+                });
+                res.send(items);
+            } else if (threadItemResult && threadItemResult.messages){
+                res.send(threadItemResult.messages[0]);
+            }
+        } catch (ex) {
+            console.log(ex);
+            res.send(ex.message);
+        }
+    });
+    
     app.listen({port:process.env.SERVER_PORT},()=>{
         console.log(`Server ready on port ${process.env.SERVER_PORT}`);
     });
