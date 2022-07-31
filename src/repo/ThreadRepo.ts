@@ -91,9 +91,9 @@ export const getThreadByCategoryId = async(
 ): Promise<QueryArrayResult<Thread>> =>{
 
     const threads = await Thread.createQueryBuilder("thread")
-    .where(`thread."categoryId = :categoryId`,{ categoryId})
+    .where(`thread."categoryId" = :categoryId`,{ categoryId})
     .leftJoinAndSelect("thread.category", "category")
-    .orderBy("thread.createdOn", "DESC")
+    .orderBy("thread.CreatedOn", "DESC")
     .getMany();
 
     if(!threads){
