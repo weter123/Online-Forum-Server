@@ -20,17 +20,7 @@ const main = async() =>{
     const app = express();
     const router = express.Router();
     //must fix: Replace create Connection if possible. utilize ormconfig
-    await createConnection({
-        type: "postgres",
-        host: "localhost",
-        port: 5432,
-        username: "superforumsvc",
-        password: "weter123",
-        database: "SuperForum",
-        synchronize: true,
-        entities: ["src/repo/**/*.*"],
-        logging: false
-      });
+    await createConnection();
 
     const redis = new Redis({
         port:Number(process.env.REDIS_PORT),

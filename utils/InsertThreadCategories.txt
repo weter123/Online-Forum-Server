@@ -17,3 +17,4 @@ VALUES ('Finance', '');
 INSERT INTO public."ThreadCategories"(
 "Name", "Description")
 VALUES ('Travel', '');
+
