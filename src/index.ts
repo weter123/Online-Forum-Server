@@ -19,9 +19,7 @@ const main = async() =>{
     
     const app = express();
     const router = express.Router();
-    //must fix: Replace create Connection if possible. utilize ormconfig
     await createConnection();
-
     const redis = new Redis({
         port:Number(process.env.REDIS_PORT),
         host: process.env.REDIS_HOST,
