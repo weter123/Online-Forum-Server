@@ -5,7 +5,7 @@ import Redis from "ioredis";
 import { createConnection } from "typeorm";
 import { login, logout, register } from "./repo/UserRepo";
 import bodyParser from "body-parser";
-import { createThread, getThreadByCategoryId } from "./repo/ThreadRepo";
+import { createThread, getThreadByCategoryId, getThreadById } from "./repo/ThreadRepo";
 
 require("dotenv").config();
 declare module "express-session" {
@@ -18,7 +18,7 @@ const main = async() =>{
     
     const app = express();
     const router = express.Router();
-    //must fix: Replace creatConnection if possible. utilze ormconfig
+    //must fix: Replace create Connection if possible. utilize ormconfig
     await createConnection({
         type: "postgres",
         host: "localhost",
@@ -142,8 +142,42 @@ const main = async() =>{
             console.log(ex);
             res.send(ex.message);
         }
-    })
+    });
 
+    router. post("/thread", async (req,res,next)=> {
+        try{
+            console.log(req.body.id);
+            const threadResult = await getThreadById(req.body.id);
+
+            if( threadResult && threadResult.entity ){
+                res.send(threadResult.entity.title);
+            } else if(threadResult && threadResult.messages){
+                res.send(threadResult.messages[0])
+            }
+        } catch (ex){
+            console.log(ex);
+            res.send(ex.message);
+        }
+    });
+
+    router.post("/threadsbycategory", async (req,res,next)=> {
+        try{
+            const threadResult = await getThreadByCategoryId(req.body.categoryId);
+
+            if( threadResult && threadResult.entities){
+                let items ="";
+                threadResult.entities.forEach((th) => {
+                    items += th.title + ", ";
+                });
+                res.send(items);
+            } else if (threadResult && threadResult.messages){
+                res.send(threadResult.messages[0]);
+            }
+        } catch (ex){
+            console.log(ex);
+            res.send(ex.message);
+        }
+    });
    
     app.listen({port:process.env.SERVER_PORT},()=>{
         console.log(`Server ready on port ${process.env.SERVER_PORT}`);
